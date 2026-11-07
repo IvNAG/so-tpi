@@ -315,14 +315,8 @@ class Memory:
 
     def _get_candidates(self, required: int) -> list[Gap]:
         candidates: list[Gap] = []
-
-        if not self.partitions:
-            if self.size >= required:
-                candidates.append(Gap(self.start, self.size))
-        else:
-            gaps = self._get_gaps()
-            candidates = [g for g in gaps if g.size >= required]
-
+        gaps = self._get_gaps()
+        candidates = [g for g in gaps if g.size >= required]
         return candidates
 
     def _get_gaps(self) -> list[Gap]:
@@ -346,6 +340,8 @@ class Memory:
             trailing_gap = self.end - last.limit
             if trailing_gap > 0:
                 gaps.append(Gap(last.limit, trailing_gap))
+        else:
+            gaps.append(Gap(self.start, self.size))
 
         return gaps
 
