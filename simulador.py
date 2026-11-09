@@ -5,7 +5,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from enum import Enum
 from itertools import count
-from typing import Any, ClassVar
+from typing import Any
 
 from loader import ProcessSpec
 
@@ -125,7 +125,7 @@ class PCB:
 
     @property
     def is_finished(self) -> bool:
-        return self.control.remaining_time == 0
+        return self.control.state == ProcessState.FINISHED
 
     @property
     def turnaround_time(self) -> int | None:
@@ -254,6 +254,16 @@ class Scheduler:
             self.logger.add(EventTy.Finalization, self.running.spec.pid)
             self.running = None
 
+    def get_report(self) -> dict[str, Any]:
+        report = {}
+        report["multiprogramming_degree"] = self.multiprogramming_degree
+        report["queues"] = {
+            "new": self.new_queue.copy(),
+            "ready": self.ready_queue.copy(),
+            "ready_suspended": self.ready_suspended_queue.copy(),
+        }
+        return report
+
 
 class Partition:
     def __init__(self, number: int, base: int, pcb: PCB) -> None:
@@ -274,13 +284,19 @@ class Gap:
 
 
 class Memory:
-    _number: ClassVar[Iterator[int]] = count(start=1)
-
     def __init__(self, size: int = MEMORY_SIZE, start: int = MEMORY_START) -> None:
         self.start: int = start
         self.end: int = self.start + size
         self.size: int = size
         self.partitions: list[Partition] = []
+
+    @property
+    def free_space(self) -> int:
+        return sum([gap.size for gap in self._get_gaps()])
+
+    @property
+    def used_space(self) -> int:
+        return sum([partition.size for partition in self.partitions])
 
     def allocate(self, pcb: PCB) -> Partition | None:
         candidates = self._get_candidates(pcb.spec.size)
@@ -308,9 +324,10 @@ class Memory:
     def get_report(self) -> dict[str, Any]:
         gaps: list[Gap] = self._get_gaps()
         report = {}
-        report["gaps"] = gaps
-        report["min_gap"] = min(gaps, key=lambda gap: gap.size, default=None)
-        report["max_gap"] = max(gaps, key=lambda gap: gap.size, default=None)
+        report["start"] = self.start
+        report["end"] = self.end
+        report["partitions"] = self.partitions.copy()
+        report["gaps"] = self._get_gaps()
         return report
 
     def _get_candidates(self, required: int) -> list[Gap]:
@@ -358,8 +375,11 @@ class Simulator:
     def get_report(self) -> dict[str, Any]:
         report = {}
         report["time"] = self.clock.now
-        report["process_table"] = self.process_table
+        report["process_table"] = self.process_table.copy()
         report["memory"] = self.memory.get_report()
+        report["scheduler"] = self.scheduler.get_report()
+        report["total_processes"] = len(self.specs)
+        report["events"] = self.logger.events
         return report
 
     def step(self) -> None:
