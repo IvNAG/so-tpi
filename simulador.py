@@ -289,6 +289,7 @@ class Memory:
         self.end: int = self.start + size
         self.size: int = size
         self.partitions: list[Partition] = []
+        self._partition_number: Iterator[int] = count(start=1)
 
     @property
     def free_space(self) -> int:
@@ -303,7 +304,7 @@ class Memory:
 
         if candidates:
             best_gap = min(candidates, key=lambda gap: gap.size)
-            new_partition = Partition(next(self._number), best_gap.base, pcb)
+            new_partition = Partition(next(self._partition_number), best_gap.base, pcb)
             insort(self.partitions, new_partition, key=lambda part: part.base)
             pcb.control.base = new_partition.base
             pcb.control.limit = new_partition.limit
@@ -322,7 +323,6 @@ class Memory:
                 break
 
     def get_report(self) -> dict[str, Any]:
-        gaps: list[Gap] = self._get_gaps()
         report = {}
         report["start"] = self.start
         report["end"] = self.end
