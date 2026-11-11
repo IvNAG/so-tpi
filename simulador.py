@@ -125,7 +125,7 @@ class PCB:
 
     @property
     def is_finished(self) -> bool:
-        return self.control.state == ProcessState.FINISHED
+        return self.control.remaining_time == 0
 
     @property
     def turnaround_time(self) -> int | None:
@@ -156,8 +156,7 @@ class PCB:
         self.control.state = ProcessState.RUNNING
 
     def mark_finished(self, time: int) -> None:
-        if self.metrics.finish_time is None:
-            self.metrics.finish_time = time
+        self.metrics.finish_time = time
         self.control.state = ProcessState.FINISHED
 
 
@@ -372,6 +371,17 @@ class Simulator:
         self.memory: Memory = Memory()
         self.scheduler: Scheduler = Scheduler(self.clock, self.logger)
 
+    @property
+    def is_finished(self) -> bool:
+        if len(self.specs) > len(self.process_table):
+            return False
+
+        for pcb in self.process_table.values():
+            if not pcb.is_finished:
+                return False
+
+        return True
+
     def get_report(self) -> dict[str, Any]:
         report = {}
         report["time"] = self.clock.now
@@ -383,13 +393,13 @@ class Simulator:
         return report
 
     def step(self) -> None:
-        self._free_finished()
         self._collect_arrivals()
         self._activate_suspended()
         self._load_new()
         self.scheduler.schedule()
         self.scheduler.step()
         self.clock.tick()
+        self._free_finished()
 
     def _free_finished(self) -> None:
         if self.scheduler.running is not None and self.scheduler.running.is_finished:
