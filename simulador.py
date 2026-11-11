@@ -405,13 +405,14 @@ class Simulator:
         return report
 
     def step(self) -> None:
-        self._collect_arrivals()
-        self._activate_suspended()
-        self._load_new()
-        self.scheduler.schedule()
-        self.scheduler.step()
-        self.clock.tick()
         self._free_finished()
+        if not self.is_finished:
+            self._collect_arrivals()
+            self._activate_suspended()
+            self._load_new()
+            self.scheduler.schedule()
+            self.scheduler.step()
+            self.clock.tick()
 
     def _free_finished(self) -> None:
         if (
