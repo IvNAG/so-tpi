@@ -382,6 +382,17 @@ class Simulator:
 
         return True
 
+    @property
+    def next_arrival(self) -> tuple[int, list[int]] | None:
+        """Devuelve el próximo instante de arribo y sus PID, o None si no quedan."""
+        pending = [spec for spec in self.specs if spec.pid not in self.process_table]
+        if not pending:
+            return None
+
+        next_arrival_time = min(spec.arrival_time for spec in pending)
+        pids = [spec.pid for spec in pending if spec.arrival_time == next_arrival_time]
+        return next_arrival_time, pids
+
     def get_report(self) -> dict[str, Any]:
         report = {}
         report["time"] = self.clock.now
@@ -389,6 +400,7 @@ class Simulator:
         report["memory"] = self.memory.get_report()
         report["scheduler"] = self.scheduler.get_report()
         report["total_processes"] = len(self.specs)
+        report["next_arrival"] = self.next_arrival
         report["events"] = self.logger.events
         return report
 
