@@ -125,7 +125,7 @@ class PCB:
 
     @property
     def is_finished(self) -> bool:
-        return self.control.remaining_time == 0
+        return self.control.state == ProcessState.FINISHED
 
     @property
     def turnaround_time(self) -> int | None:
@@ -414,7 +414,10 @@ class Simulator:
         self._free_finished()
 
     def _free_finished(self) -> None:
-        if self.scheduler.running is not None and self.scheduler.running.is_finished:
+        if (
+            self.scheduler.running is not None
+            and self.scheduler.running.control.remaining_time == 0
+        ):
             self.memory.free(self.scheduler.running)
             self.scheduler.release()
 
