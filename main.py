@@ -3,7 +3,7 @@ from pathlib import Path
 import cli
 import loader
 from loader import ProcessSpec
-from simulador import USER_SPACE_SIZE, Simulator
+from simulador import MAX_LOADED_PROCESSES, USER_SPACE_SIZE, Simulator
 from style import GRAY, ORANGE, PADDING, RESET, YELLOW
 
 options = ["Cargar desde archivo .csv", "Usar archivo de ejemplo"]
@@ -43,6 +43,8 @@ def get_path() -> Path:
 
 def load_specs() -> list[ProcessSpec]:
     cli.clear()
+    cli.draw_banner()
+    print()
     print_options()
     selection = get_selection()
 
@@ -50,7 +52,7 @@ def load_specs() -> list[ProcessSpec]:
         path = get_path()
     else:
         path = Path("prueba/procesos.csv")
-    return loader.read_specs_from_file(path)
+    return loader.read_specs_from_file(path, amount=MAX_LOADED_PROCESSES)
 
 
 def run_simulation(simulator: Simulator) -> None:

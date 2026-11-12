@@ -65,13 +65,18 @@ def validate_specs(specs: list[ProcessSpec], size_limit: int) -> bool:
         return True
 
 
-def read_specs_from_file(path: Path) -> list[ProcessSpec]:
+def read_specs_from_file(path: Path, amount: int = 8) -> list[ProcessSpec]:
     with open(path, "r", newline="", encoding="utf-8") as file:
         reader = csv.reader(file)
         next(reader)
 
         specs: list[ProcessSpec] = []
-        for row in reader:
+        for i, row in enumerate(reader, start=1):
+            if i > amount:
+                error = f"El archivo supera el límite de procesos. Se leyeron los primeros {amount}."
+                print(f"{PADDING}{ORANGE}ERROR: {error}{RESET}")
+                return specs
+
             pid, size, arrival, burst = map(int, row)
             specs.append(ProcessSpec(pid, size, arrival, burst))
 
