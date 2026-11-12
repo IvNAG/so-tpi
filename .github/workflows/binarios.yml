@@ -1,0 +1,50 @@
+name: generar binarios
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Compilar para ${{ matrix.plataforma }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - plataforma: windows-x64
+            runner: windows-2022
+            ejecutable: simulador.exe
+          - plataforma: linux-x64
+            runner: ubuntu-22.04
+            ejecutable: simulador
+
+    steps:
+      - name: Descargar el código del repositorio
+        uses: actions/checkout@v7
+
+      - name: Configurar Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Instalar PyInstaller
+        run: python -m pip install "pyinstaller>=6,<7"
+
+      - name: Generar el ejecutable
+        run: >-
+          python -m PyInstaller
+          --onefile
+          --console
+          --name simulador
+          --add-data "prueba/procesos.csv:prueba"
+          main.py
+
+      - name: Guardar el ejecutable para descargar
+        uses: actions/upload-artifact@v4
+        with:
+          name: procesos-${{ matrix.plataforma }}
+          path: dist/${{ matrix.ejecutable }}
+          if-no-files-found: error

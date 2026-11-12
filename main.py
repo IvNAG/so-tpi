@@ -8,6 +8,9 @@ from style import GRAY, ORANGE, PADDING, RESET, YELLOW
 
 options = ["Cargar desde archivo .csv", "Usar archivo de ejemplo"]
 
+# Ruta para poder incluir archivo de prueba en los binarios
+test_file_route = Path(__file__).resolve().parent / "prueba" / "procesos.csv"
+
 
 def print_options() -> None:
     for i, opt in enumerate(options, start=1):
@@ -51,7 +54,7 @@ def load_specs() -> list[ProcessSpec]:
     if selection == 1:
         path = get_path()
     else:
-        path = Path("prueba/procesos.csv")
+        path = test_file_route
     return loader.read_specs_from_file(path, amount=MAX_LOADED_PROCESSES)
 
 
