@@ -3,8 +3,12 @@ from typing import Any
 
 from loader import ProcessSpec
 from simulador import (
+    MAX_LOADED_PROCESSES,
     MAX_MULTIPROGRAMMING,
+    MEMORY_START,
     PCB,
+    USER_SPACE_SIZE,
+    USER_SPACE_START,
     Event,
     EventTy,
     Gap,
@@ -48,6 +52,51 @@ TABLE_COLUMN_GAP = "  "
 def clear() -> None:
     """Borra la pantalla y el historial de desplazamiento, y lleva el cursor al inicio."""
     print(CLEAR, end="", flush=True)
+
+
+def draw_banner() -> None:
+    """Presenta el simulador y sus políticas y límites actuales, con colores ANSI."""
+    inner_width = WIDTH - 4
+    column_width = inner_width // 2
+    os_size = USER_SPACE_START - MEMORY_START
+    total_size = os_size + USER_SPACE_SIZE
+    title = _center("Simulador de planificador de procesos", inner_width)
+    subtitle = _center("CPU · MEMORIA · PLANIFICACIÓN", inner_width)
+    rows = [
+        "",
+        f"{TITLE_STYLE}{BOLD}{title}{RESET}",
+        f"{GRAY}{subtitle}{RESET}",
+        "",
+    ]
+    parameters = [
+        ("Memoria total", f"{total_size}K", BLUE),
+        ("Planificación de CPU", "SRTF", GREEN),
+        ("Memoria de usuario", f"{USER_SPACE_SIZE}K", LAVENDER),
+        ("Organización de memoria", "Particiones variables", ORANGE),
+        ("Reservado para el SO", f"{os_size}K", GRAY),
+        ("Asignación de memoria", "Best-Fit", YELLOW),
+        ("Multiprogramación máx.", f"{MAX_MULTIPROGRAMMING} procesos", GREEN),
+        ("Máx. cantdid de procesos", f"{MAX_LOADED_PROCESSES}", BLUE),
+    ]
+    label_widths = [
+        max(len(label) for label, _, _ in parameters[column::2]) + 2
+        for column in range(2)
+    ]
+    items = [
+        f"{color}●{RESET} "
+        + _row(label, label_widths[index % 2], f"{color}{BOLD}{value}{RESET}")
+        for index, (label, value, color) in enumerate(parameters)
+    ]
+    group_widths = [
+        max(_visible_len(item) for item in items[column::2]) for column in range(2)
+    ]
+    margins = [(column_width - width) // 2 for width in group_widths]
+    for index in range(0, len(items), 2):
+        left = _pad(" " * margins[0] + items[index], column_width)
+        right = _pad(" " * margins[1] + items[index + 1], column_width)
+        rows.append(left + right)
+    rows.append("")
+    _print_box("", rows)
 
 
 def await_user_input(action_message: str = "continuar") -> None:
@@ -154,9 +203,9 @@ def _build_box(
 ) -> list[str]:
     """Devuelve las líneas de un panel: borde superior, filas y borde inferior.
 
-    `subtitle` se escribe en gris a continuación del título. El alto del panel
-    lo determina la cantidad de `rows`."""
-    label = f" {title} "
+    Un título vacío deja el borde continuo. `subtitle` se escribe en gris a
+    continuación del título. El alto lo determina la cantidad de `rows`."""
+    label = f" {title} " if title else ""
     sub_label = f" {subtitle} " if subtitle else ""
     inner_width = width - 4  # Borde + espacio a cada lado
 
