@@ -1,0 +1,88 @@
+from pathlib import Path
+
+import cli
+import loader
+from loader import ProcessSpec
+from simulador import USER_SPACE_SIZE, Simulator
+from style import GRAY, ORANGE, PADDING, RESET, YELLOW
+
+options = ["Cargar desde archivo .csv", "Usar archivo de ejemplo"]
+
+
+def print_options() -> None:
+    for i, opt in enumerate(options, start=1):
+        print(f"{PADDING}[{i}] {opt}")
+
+
+def get_selection() -> int:
+    value_range = f"1..{len(options)}"
+
+    while True:
+        option = input(f"\n{PADDING}{YELLOW}Opción 🞂 {RESET}")
+
+        try:
+            selection = int(option)
+        except ValueError:
+            error = "Ingresá un valor numérico"
+        else:
+            if 1 <= selection <= len(options):
+                return selection
+            error = f"Ingresá un número válido ({value_range})"
+
+        print(f"\n{PADDING}{ORANGE}ERROR: {error}{RESET}")
+
+
+def get_path() -> Path:
+    while True:
+        option = input(f"\n{PADDING}{YELLOW}Ruta del archivo 🞂 {RESET}")
+        route = Path(option)
+        if route.exists():
+            return route
+        print(f"\n{PADDING}{ORANGE}ERROR: Ingresá una ruta válida{RESET}")
+
+
+def load_specs() -> list[ProcessSpec]:
+    cli.clear()
+    print_options()
+    selection = get_selection()
+
+    if selection == 1:
+        path = get_path()
+    else:
+        path = Path("prueba/procesos.csv")
+    return loader.read_specs_from_file(path)
+
+
+def run_simulation(simulator: Simulator) -> None:
+    while True:
+        simulator.step()
+        cli.clear()
+        cli.draw_state(simulator.get_report())
+        if simulator.is_finished:
+            return
+
+        cli.await_user_input("avanzar una unidad de tiempo")
+
+
+def main() -> None:
+    specs = load_specs()
+    if not loader.validate_specs(specs, size_limit=USER_SPACE_SIZE):
+        return
+
+    cli.print_loaded_specs(specs)
+    print()
+    cli.await_user_input()
+
+    simulator = Simulator(specs)
+    run_simulation(simulator)
+
+    cli.await_user_input("mostrar resumen final")
+    cli.clear()
+    cli.draw_summary(simulator.get_report())
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        print(f"\n{PADDING}{GRAY}Simulación interrumpida")
