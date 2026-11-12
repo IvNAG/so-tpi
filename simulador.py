@@ -9,8 +9,9 @@ from typing import Any
 
 from loader import ProcessSpec
 
-MEMORY_START = 100
-MEMORY_SIZE = 450
+MEMORY_START = 0
+USER_SPACE_START = 100
+USER_SPACE_SIZE = 450
 MAX_MULTIPROGRAMMING = 5
 
 
@@ -283,7 +284,9 @@ class Gap:
 
 
 class Memory:
-    def __init__(self, size: int = MEMORY_SIZE, start: int = MEMORY_START) -> None:
+    def __init__(
+        self, size: int = USER_SPACE_SIZE, start: int = USER_SPACE_START
+    ) -> None:
         self.start: int = start
         self.end: int = self.start + size
         self.size: int = size
