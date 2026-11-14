@@ -99,9 +99,15 @@ def draw_banner() -> None:
     _print_box("", rows)
 
 
-def await_user_input(action_message: str = "continuar") -> None:
-    while input(f"{PADDING}Presioná {YELLOW}ENTER{RESET} para {action_message}") != "":
-        pass
+def await_user_input(options: dict[str, str]) -> str:
+    """Muestra las opciones y devuelve la tecla elegida."""
+    prompt = "  ·  ".join(options.values())
+    while True:
+        choice = input(f"{PADDING}{prompt} ").lower()
+        if choice in options:
+            return choice
+        if choice and len(set(choice)) == 1 and choice[0] in options:
+            return choice[0]
 
 
 def print_loaded_specs(loaded: list[ProcessSpec]) -> None:
