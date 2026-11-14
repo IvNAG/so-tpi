@@ -60,13 +60,19 @@ def load_specs() -> list[ProcessSpec]:
 
 def run_simulation(simulator: Simulator) -> None:
     while True:
-        simulator.step()
         cli.clear()
         cli.draw_state(simulator.get_report())
         if simulator.is_finished:
             return
 
-        cli.await_user_input("avanzar una unidad de tiempo")
+        choice = cli.await_user_input({
+            "": f"{YELLOW}ENTER{RESET}: avanzar una unidad",
+            "s": f"{YELLOW}S + ENTER{RESET}: próxima admisión o finalización",
+        })
+        if choice == "":
+            simulator.step()
+        else:
+            simulator.skip_to_important_step()
 
 
 def main() -> None:
@@ -76,12 +82,12 @@ def main() -> None:
 
     cli.print_loaded_specs(specs)
     print()
-    cli.await_user_input()
+    cli.await_user_input({"": f"Presioná {YELLOW}ENTER{RESET} para continuar"})
 
     simulator = Simulator(specs)
     run_simulation(simulator)
 
-    cli.await_user_input("mostrar resumen final")
+    cli.await_user_input({"": f"Presioná {YELLOW}ENTER{RESET} para mostrar resumen final"})
     cli.clear()
     cli.draw_summary(simulator.get_report())
 

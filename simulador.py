@@ -418,6 +418,18 @@ class Simulator:
             self.scheduler.step()
             self.clock.tick()
 
+    def skip_to_important_step(self) -> None:
+        while not self.is_finished:
+            previous_count = len(self.logger.events)
+            self.step()
+
+            new_events = self.logger.events[previous_count:]
+            if any(
+                event.type in (EventTy.Admission, EventTy.Finalization)
+                for event in new_events
+            ):
+                return
+
     def _free_finished(self) -> None:
         if (
             self.scheduler.running is not None
