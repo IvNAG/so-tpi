@@ -1,7 +1,7 @@
 import unittest
 
 from loader import ProcessSpec
-from simulador import MEMORY_SIZE, PCB, Memory, Partition
+from simulador import PCB, USER_SPACE_SIZE, Memory, Partition
 
 
 def make_pcb(pid: int, size: int) -> PCB:
@@ -36,7 +36,7 @@ class TestMemory(unittest.TestCase):
         return [(part.pid, part.base, part.size) for part in self.memory.partitions]
 
     def test_request_larger_than_memory_fails(self) -> None:
-        pcb = make_pcb(1, MEMORY_SIZE + 1)
+        pcb = make_pcb(1, USER_SPACE_SIZE + 1)
         partition = self.memory.allocate(pcb)
 
         self.assertIsNone(partition)
