@@ -75,7 +75,7 @@ def draw_banner() -> None:
         ("Reservado para el SO", f"{os_size}K", GRAY),
         ("Asignación de memoria", "Best-Fit", YELLOW),
         ("Multiprogramación máx.", f"{MAX_MULTIPROGRAMMING} procesos", GREEN),
-        ("Máx. cantdid de procesos", f"{MAX_LOADED_PROCESSES}", BLUE),
+        ("Máx. cant. de procesos", f"{MAX_LOADED_PROCESSES}", BLUE),
     ]
     label_widths = [
         max(len(label) for label, _, _ in parameters[column::2]) + 2
@@ -337,9 +337,7 @@ def _cpu_rows(report: Report) -> list[str]:
     executed = burst - remaining
     percentage = round(executed / burst * 100) if burst > 0 else 0
 
-    process = (
-        f"{_process_badge(pcb.identity.pid)} {GRAY}({pcb.spec.size}K){RESET}"
-    )
+    process = f"{_process_badge(pcb.identity.pid)} {GRAY}({pcb.spec.size}K){RESET}"
 
     progress = (
         f"{_bar(executed, burst, bar_width, BLUE)} {WHITE}{BOLD}{percentage}%{RESET}"
