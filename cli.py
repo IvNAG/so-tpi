@@ -289,8 +289,9 @@ def _process_badge_style(pid: int) -> str:
 
 def _process_badge(pid: int, pid_width: int = 0) -> str:
     """Badge del PID, con ancho opcional para alinear los procesos cargados."""
-    label = f"P{pid}".rjust(pid_width)
-    return f"{_process_badge_style(pid)} {label} {RESET}"
+    label = f"P{pid}"
+    alignment = " " * max(0, pid_width - len(label))
+    return f"{alignment}{_process_badge_style(pid)} {label} {RESET}"
 
 
 def _process_dim_color(pid: int) -> int:
