@@ -391,7 +391,7 @@ def _summary_rows(report: Report) -> list[str]:
 
 def _draw_heading(report: Report) -> None:
     """Dibuja los paneles PROCESADOR y RESUMEN uno al lado del otro."""
-    cpu_width = WIDTH // 2
+    cpu_width = WIDTH // 2 - 4
     summary_width = WIDTH - cpu_width
     _print_side_by_side(
         _build_box("PROCESADOR", _cpu_rows(report), cpu_width),
