@@ -6,6 +6,9 @@
 
 </div>
 
+<br>
+<br>
+
 > [!NOTE]  
 > Toda la interfaz de la terminal, contenida dentro del archivo cli.py, fue creada con inteligencia artificial.
 
@@ -19,18 +22,11 @@ Para no organizar todo dentro del planificador y que este sea el encargado de ma
     
 La simulación permite avanzar una sola unidad de tiempo o avanzar hasta el siguiente evento donde haya ocurrido una admisión o finalización de un proceso en ejecución, para lo cuál existen las clases `Event` y `EventTy` que registran esto. En cada paso, `Simulator` libera el proceso en ejecución en caso de que haya agotado su tiempo, registra las nuevas llegadas, intenta cargar en memoria a los procesos suspendidos, intenta asignar a los procesos nuevos, luego delega al planificador la decisión de qué proceso ejecutar, y por último avanza el reloj. 
 
-```mermaid
-flowchart LR
-    A["Liberar finalizados"] --> B["Registrar llegadas"]
-    B --> C["Asignar memoria<br/>a suspendidos"]
-    C --> D["Asignar memoria<br/>a nuevos"]
-    D --> E["Planificar y ejecutar<br/>una unidad de tiempo"]
-    E --> F["Avanzar el reloj"]
-```
+<img src="imágenes/flujo_asignación.png" alt="Diagrama de flujo de asignación" width="100%">
 
-Cada proceso se carga a partir de una especificación de proceso (`ProcessSpec`), que es leida de un archivo .csv, y con la cuál se genera su `PCB` dentro del simulador, en el instante que arriban. Cada PCB tiene asociadas las clases `Identity` y `ControlInfo`, las cuáles reflejan los apartados del PCB vistos en la teória. Además, los PCB también contienen una referencia a la especificación a partir de la cuál fueron generados, y una clase `Metrics` para guardar información estadística relacionada a la ejecución del proceso. Cada uno de estos PCB son almacenados dentro de la tabla de procesos, un diccionario que relaciona los pid con sus respectivos bloques de controel, y que vive dentro del simulador.
+Cada proceso se carga a partir de una especificación de proceso (`ProcessSpec`), que es leida de un archivo .csv, y con la cuál se genera su `PCB` dentro del simulador, en el instante que arriban. Cada PCB tiene asociadas las clases `Identity` y `ControlInfo`, las cuáles reflejan los apartados del PCB vistos en la teória. Además, los PCB también contienen una referencia a la especificación a partir de la cuál fueron generados, y una clase `Metrics` para guardar información estadística relacionada a la ejecución del proceso. Cada uno de estos PCB son almacenados dentro de la tabla de procesos, un diccionario que relaciona los pid con sus respectivos bloques de control, y que vive dentro del simulador.
 
-<img src="imágenes/procesos-clases.png" alt="MER de procesos" width="100%">
+<img src="imágenes/procesos_clases.png" alt="MER de procesos" width="100%">
 
 El resto de estadísticas son derivadas a partir de estas clases.
 
