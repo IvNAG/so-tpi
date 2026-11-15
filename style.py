@@ -1,7 +1,5 @@
 import re
 
-WIDTH = 100
-
 PADDING = "  "
 
 # Secuencias ANSI. https://handwiki.org/wiki/ANSI_escape_code
@@ -19,7 +17,6 @@ ORANGE = "\033[38;5;209m"
 WHITE = "\033[38;5;252m"
 LAVENDER = "\033[38;5;147m"
 TRACK = "\033[38;5;237m"  # Fondo de las barras de progreso vacías
-BADGE = "\033[48;5;221m\033[38;5;16m"  # Texto oscuro sobre fondo amarillo
 
 # Estilos de la barra de memoria (fondo + color del texto)
 DARK_TEXT = "\033[38;5;16m"  # Texto oscuro para escribir sobre fondos de color

@@ -17,7 +17,6 @@ from simulador import (
 )
 from style import (
     ANSI_PATTERN,
-    BADGE,
     BLOCK,
     BLUE,
     BOLD,
@@ -125,17 +124,15 @@ def print_loaded_specs(loaded: list[ProcessSpec]) -> None:
 
     for spec in loaded:
         color = _process_color(spec.pid)
-        badge_style = f"\033[48;5;{color}m{DARK_TEXT}{BOLD}"
         name_style = f"\033[38;5;{color}m{BOLD}"
 
-        pid = f"P{spec.pid}".rjust(pid_width)
         name = spec.name.ljust(name_width)
         size = f"{spec.size}K".rjust(size_width)
         arrival = str(spec.arrival_time).rjust(arrival_width)
         burst = f"{spec.burst_time}u".rjust(burst_width)
 
         print(
-            f"{PADDING}{badge_style} {pid} {RESET}"
+            f"{PADDING}{_process_badge(spec.pid, pid_width)}"
             f"  {name_style}{name}{RESET}"
             f"   {GRAY}tamaño {WHITE}{size}"
             f"   {GRAY}arribo {WHITE}t={arrival}"
@@ -285,6 +282,17 @@ def _process_color(pid: int) -> int:
     return PROCESS_COLORS[pid % len(PROCESS_COLORS)]
 
 
+def _process_badge_style(pid: int) -> str:
+    """Fondo del proceso y texto oscuro en negrita, comunes a todos los badges."""
+    return f"\033[48;5;{_process_color(pid)}m{DARK_TEXT}{BOLD}"
+
+
+def _process_badge(pid: int, pid_width: int = 0) -> str:
+    """Badge del PID, con ancho opcional para alinear los procesos cargados."""
+    label = f"P{pid}".rjust(pid_width)
+    return f"{_process_badge_style(pid)} {label} {RESET}"
+
+
 def _process_dim_color(pid: int) -> int:
     """Obtiene el tinte tenue del sombreado sobre el fondo gris oscuro de espera."""
     color = _process_color(pid) - 16
@@ -329,7 +337,7 @@ def _cpu_rows(report: Report) -> list[str]:
     percentage = round(executed / burst * 100) if burst > 0 else 0
 
     process = (
-        f"{BADGE}{BOLD} P{pcb.identity.pid} {RESET} {GRAY}({pcb.spec.size}K){RESET}"
+        f"{_process_badge(pcb.identity.pid)} {GRAY}({pcb.spec.size}K){RESET}"
     )
 
     progress = (
@@ -408,18 +416,13 @@ QUEUES = (
 )
 
 
-def _queue_badge(pcb: PCB) -> str:
-    """Etiqueta del proceso con el fondo de su color, igual que en la barra de memoria."""
-    color = _process_color(pcb.identity.pid)
-    return f"\033[48;5;{color}m{DARK_TEXT}{BOLD} P{pcb.identity.pid} {RESET}"
-
-
 def _queue_rows(report: Report) -> list[str]:
     """Una fila por cola: título, separador y los badges en el orden de la cola."""
     rows = []
     for title, key, color in QUEUES:
         badges = " ".join(
-            _queue_badge(pcb) for pcb in report["scheduler"]["queues"][key]
+            _process_badge(pcb.identity.pid)
+            for pcb in report["scheduler"]["queues"][key]
         )
         rows.append(
             f"{color}{BOLD}{title.ljust(QUEUE_LABEL_WIDTH)}{RESET}"
@@ -451,7 +454,7 @@ def _memory_segment(block: Partition | Gap | None, columns: int) -> str:
     elif isinstance(block, Gap):
         style, text = FREE_STYLE, "libre" if columns >= 7 else ""
     else:
-        style = f"\033[48;5;{_process_color(block.pid)}m{DARK_TEXT}{BOLD}"
+        style = _process_badge_style(block.pid)
         text = f"P{block.pid}"
     return f"{style}{_center(text, columns)}{RESET}"
 
@@ -579,10 +582,10 @@ PANEL_ROWS = 9
 # Columnas de la tabla de procesos: (título, ancho, alineación del título y contenido)
 PROCESS_COLUMNS = (
     ("PID", 5, "^"),
-    ("Tamaño", 8, ">"),
-    ("Arr.", 5, "^"),
-    ("Irr.", 5, "^"),
-    ("Restante", 9, "^"),
+    ("Tam.", 6, ">"),
+    ("TA", 4, ">"),
+    ("TI", 4, ">"),
+    ("TR", 4, ">"),
     ("Estado", 14, "<"),
     ("Partición", 10, "^"),
 )
