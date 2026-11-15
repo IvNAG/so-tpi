@@ -32,7 +32,7 @@ def get_selection() -> int:
                 return selection
             error = f"Ingresá un número válido ({value_range})"
 
-        print(f"\n{PADDING}{ORANGE}ERROR: {error}{RESET}")
+        print(f"{PADDING}{ORANGE}ERROR: {error}{RESET}")
 
 
 def get_path() -> Path:
@@ -41,7 +41,7 @@ def get_path() -> Path:
         route = Path(option)
         if route.exists():
             return route
-        print(f"\n{PADDING}{ORANGE}ERROR: Ingresá una ruta válida{RESET}")
+        print(f"{PADDING}{ORANGE}ERROR: Ingresá una ruta válida{RESET}")
 
 
 def load_specs() -> list[ProcessSpec]:
@@ -65,10 +65,12 @@ def run_simulation(simulator: Simulator) -> None:
         if simulator.is_finished:
             return
 
-        choice = cli.await_user_input({
-            "": f"{YELLOW}ENTER{RESET}: avanzar una unidad",
-            "s": f"{YELLOW}S + ENTER{RESET}: próxima admisión o finalización",
-        })
+        choice = cli.await_user_input(
+            {
+                "": f"{YELLOW}ENTER{RESET}: avanzar una unidad",
+                "s": f"{YELLOW}S + ENTER{RESET}: próxima admisión o finalización",
+            }
+        )
         if choice == "":
             simulator.step()
         else:
@@ -87,7 +89,9 @@ def main() -> None:
     simulator = Simulator(specs)
     run_simulation(simulator)
 
-    cli.await_user_input({"": f"Presioná {YELLOW}ENTER{RESET} para mostrar resumen final"})
+    cli.await_user_input(
+        {"": f"Presioná {YELLOW}ENTER{RESET} para mostrar resumen final"}
+    )
     cli.clear()
     cli.draw_summary(simulator.get_report())
 
