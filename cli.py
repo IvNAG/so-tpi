@@ -337,7 +337,7 @@ def _cpu_rows(report: Report) -> list[str]:
     executed = burst - remaining
     percentage = round(executed / burst * 100) if burst > 0 else 0
 
-    process = f"{_process_badge(pcb.identity.pid)} {GRAY}({pcb.spec.size}K){RESET}"
+    process = f"{_process_badge(pcb.identity.pid)}{RESET}"
 
     progress = (
         f"{_bar(executed, burst, bar_width, BLUE)} {WHITE}{BOLD}{percentage}%{RESET}"
