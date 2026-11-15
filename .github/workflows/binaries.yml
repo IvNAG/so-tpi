@@ -1,4 +1,4 @@
-name: generar binarios
+name: binaries
 
 on:
   workflow_dispatch:
