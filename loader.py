@@ -57,7 +57,6 @@ def validate_specs(specs: list[ProcessSpec], size_limit: int) -> bool:
             errors.append(f"P{spec.pid} tiene un tiempo de irrupción negativo")
 
     if errors:
-        print()
         for err in errors:
             print(f"{ORANGE}{PADDING}ERROR: {err}{RESET}")
         return False
