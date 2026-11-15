@@ -371,9 +371,7 @@ def _summary_rows(report: Report) -> list[str]:
     memory = report["memory"]
     used = sum(p.size for p in memory["partitions"])
     size = memory["end"] - memory["start"]
-    memory_info = (
-        f"{_bar(used, size, bar_width, LAVENDER)} {WHITE}{used}/{size}K{RESET}"
-    )
+    memory_info = f"{_bar(used, size, bar_width, GREEN)} {WHITE}{used}/{size}K{RESET}"
 
     return [
         _row("Multiprogramación", label_width, multiprogramming),
