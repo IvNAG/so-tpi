@@ -576,9 +576,6 @@ def _draw_memory(report: Report) -> None:
 # Procesos
 # ---------------------------------------------------------------------------
 
-# Mínimo de filas del panel PROCESOS y cantidad de filas del panel EVENTOS
-PANEL_ROWS = 9
-
 # Columnas de la tabla de procesos: (título, ancho, alineación del título y contenido)
 PROCESS_COLUMNS = (
     ("PID", 5, "^"),
@@ -638,7 +635,7 @@ def _process_rows(report: Report) -> list[str]:
         ]
         rows.append(_table_row(cells, PROCESS_COLUMNS))
 
-    return _fill_rows(rows, PANEL_ROWS)
+    return rows
 
 
 # ---------------------------------------------------------------------------
@@ -663,9 +660,9 @@ def _is_recent(report: Report, event: Event) -> bool:
     return event.time == report["time"] - 1
 
 
-def _event_rows(report: Report, width: int) -> list[str]:
+def _event_rows(report: Report, width: int, height: int) -> list[str]:
     """Muestra los últimos eventos completos, continuando en otra línea si hace falta."""
-    events = report["events"][-PANEL_ROWS:]
+    events = report["events"][-height:]
 
     rows = []
     for event in reversed(events):
@@ -684,7 +681,7 @@ def _event_rows(report: Report, width: int) -> list[str]:
 
     if not rows:
         rows.append(f"{GRAY}(sin eventos todavía){RESET}")
-    return _fill_rows(rows, PANEL_ROWS)
+    return rows
 
 
 # ---------------------------------------------------------------------------
@@ -696,20 +693,24 @@ def _draw_processes_and_events(report: Report) -> None:
     """Dibuja los paneles PROCESOS y EVENTOS uno al lado del otro.
 
     Reparte el ancho en 2/3 y 1/3, dando más espacio a EVENTOS si lo necesita."""
+    min_height = 9  # Ocho procesos más el encabezado de la tabla.
     process_rows = _process_rows(report)
+    height = max(min_height, len(process_rows))
     minimum_process_width = max(
         _process_box_width(), max(_visible_len(row) for row in process_rows) + 4
     )
-    event_rows = _event_rows(report, WIDTH)
+    event_rows = _event_rows(report, WIDTH, height)
     required_event_width = max(_visible_len(row) for row in event_rows) + 4
     event_width = min(
         max(WIDTH // 3, required_event_width), WIDTH - minimum_process_width
     )
     process_width = WIDTH - event_width
+    event_rows = _event_rows(report, event_width, height)
+    height = max(height, len(event_rows))
     _print_side_by_side(
-        _build_box("PROCESOS", process_rows, process_width),
+        _build_box("PROCESOS", _fill_rows(process_rows, height), process_width),
         process_width,
-        _build_box("EVENTOS", _event_rows(report, event_width), event_width),
+        _build_box("EVENTOS", _fill_rows(event_rows, height), event_width),
         event_width,
     )
 
